@@ -1,7 +1,9 @@
 from kafka_manager import KafkaManager
 from json import loads, dumps
-
 import sys
+
+# LSTM 윈도우 크기
+WINDOW_SIZE = 24
 
 # 메인 클래스
 class main(KafkaManager):
@@ -20,6 +22,13 @@ class main(KafkaManager):
             print("받은 메시지 : ", jsonObj)
             print("받은 시간 : ", jsonObj['msg_data']['timestamp'])
             print("json : ", jsonObj['msg_data']['features'])
+
+    # 버퍼에 데이터를 저장한다. 
+    # 버퍼에 저장되는 데이터 개수는 WINDOW_SIZE를 넘지 않는다.
+    def push(self, value):
+        self.buffer.append(value)
+        if (self.buffer.count() > WINDOW_SIZE):
+            self.buffer.remove(1)
 
 if __name__ == '__main__':
     main = main(sys.argv)
