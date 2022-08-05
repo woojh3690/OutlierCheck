@@ -1,4 +1,5 @@
 from kafka_manager import KafkaManager
+from table_queue import TableQueue
 
 import tensorflow as tf
 import numpy as np
@@ -7,6 +8,7 @@ from json import loads, dumps
 import sys
 
 WINDOW_SIZE = 24        # lstm 윈도우 크기
+FEATURE_SIZE = 6        # lstm 윈도우 크기
 THRESHOLD_MSE = 0.4     # 기준 mse
 
 # 메인 클래스
@@ -14,7 +16,7 @@ class main(KafkaManager):
 
     def __init__(self, args):
         super().__init__(args[1], args[2])
-        self.buffer = []
+        self.buffer = TableQueue(WINDOW_SIZE, FEATURE_SIZE)
         self.lstm = tf.keras.models.load_model('tf_model/v2')
         self.lstm.summary()    
 
@@ -26,28 +28,23 @@ class main(KafkaManager):
             except: pass
 
             print("받은 메시지 : ", jsonObj)
-            self.push(jsonObj['msg_data']['features'])
+            self.buffer.push(jsonObj['idx'], jsonObj['feature'])
             result = self.check_outlier()
 
             # 문제 없는 데이터면 다음 메시지 대기
             if (result): continue
 
             # 문제 있는 데이터면 출력
-            print(self.buffer)
-    
-    # 버퍼에 데이터를 저장한다. 
-    # 버퍼에 저장되는 데이터 개수는 WINDOW_SIZE를 넘지 않는다.
-    def push(self, value):
-        self.buffer.append(value)
-        if (len(self.buffer) > WINDOW_SIZE):
-            self.buffer.pop(0) 
+            print(self.buffer.queue)
 
     # 버퍼가 가득찼으면 버퍼에 데이터를 이상감지 모델로 검사한다.
     def check_outlier(self):
-        if (len(self.buffer) < WINDOW_SIZE):
-            return True
+        np_data = np.array(self.buffer.queue)
         
-        np_data = np.array([self.buffer])
+        if not np.issubdtype(np_data.dtype, np.number):
+            return True
+
+        np_data = np.expand_dims(np_data.T, axis=0) # 전치행렬
         predict = self.lstm.predict(np_data, verbose = 0)
         diff_data = self.flatten(np_data) - self.flatten(predict)
         mse = np.mean(np.power(diff_data, 2), axis=1)[0]
