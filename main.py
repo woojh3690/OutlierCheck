@@ -36,7 +36,7 @@ class main(KafkaManager):
     def push(self, value):
         self.buffer.append(value)
         if (len(self.buffer) > WINDOW_SIZE):
-            self.buffer.remove(1) 
+            self.buffer.pop(0) 
 
     # 버퍼가 가득찼으면 버퍼에 데이터를 이상감지 모델로 검사한다.
     def check_outlier(self):
@@ -49,6 +49,7 @@ class main(KafkaManager):
         predict = self.lstm.predict(np_data)
         diff_data = self.flatten(np_data) - self.flatten(predict)
         mse = np.mean(np.power(diff_data, 2), axis=1)
+        print(mse)
 
     # 3차원 -> 2차원 변환    
     def flatten(self, X):
