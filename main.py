@@ -1,5 +1,4 @@
 from kafka_manager import KafkaManager
-from table_queue import TableQueue
 
 import tensorflow as tf
 import numpy as np
@@ -17,11 +16,11 @@ MODEL_VER = 'v2'
 class main(Thread, KafkaManager):
 
     def __init__(self, args):
-        if (args != 2): print('유효한 인자가 없습니다.')
+        if (len(args) != 3): print('유효한 인자가 없습니다.')
 
         KafkaManager.__init__(self, args[1], args[2])
         Thread.__init__(self)
-        self.buffer = TableQueue(WINDOW_SIZE, FEATURE_SIZE)
+        self.buffer = []
         self.lstm = tf.keras.models.load_model('tf_model/{}'.format(MODEL_VER))
         self.lstm.summary()
         self.is_end = False
@@ -29,34 +28,42 @@ class main(Thread, KafkaManager):
     # @profile
     def run(self):
         print("Listening kafka message...")
-        for message in self.consumer:
+        while (True):
             # 종료 체크
             if (self.is_end):
                 self.kafka_close()
                 break
 
-            try:
-                jsonObj = loads(message.value)
+            for message in self.consumer:
+                try:
+                    jsonObj = loads(message.value)
 
-                print("받은 메시지 : ", jsonObj)
-                self.buffer.push(jsonObj['idx'], jsonObj['feature'])
-                result = self.check_outlier()
+                    print("받은 메시지 : ", jsonObj)
+                    self.push(jsonObj['features'])
+                    result = self.check_outlier()
 
-                # 문제 없는 데이터면 다음 메시지 대기
-                if (result): continue
+                    # 문제 없는 데이터면 다음 메시지 대기
+                    if (result): continue
 
-                # 문제 있는 데이터면 출력
-                print(self.buffer.queue)
-            except Exception as e: 
-                print(e)
+                    # 문제 있는 데이터면 출력
+                    print(self.buffer)
+                except Exception as e: 
+                    print(e)
+        print("End kafka listening...")
     
+    # 버퍼에 데이터를 저장한다. 
+    # 버퍼에 저장되는 데이터 개수는 WINDOW_SIZE를 넘지 않는다.
+    def push(self, value):
+        self.buffer.append(value)
+        if (len(self.buffer) > WINDOW_SIZE):
+            self.buffer.pop(0)
+
     # 버퍼가 가득찼으면 버퍼에 데이터를 이상감지 모델로 검사한다.
     def check_outlier(self):
-        np_data = np.array(self.buffer.queue)
-        if not np.issubdtype(np_data.dtype, np.number):
-            return True
-
-        np_data = np.expand_dims(np_data.T, axis=0) # 전치행렬
+        if (len(self.buffer) < WINDOW_SIZE):
+            return
+        
+        np_data = np.array([self.buffer])
         predict = self.lstm.predict(np_data, verbose = 0)
         diff_data = self.flatten(np_data) - self.flatten(predict)
         mse = np.mean(np.power(diff_data, 2), axis=1)[0]
@@ -78,3 +85,4 @@ class main(Thread, KafkaManager):
 if __name__ == '__main__':
     main = main(sys.argv)
     main.start()
+    main.join()
