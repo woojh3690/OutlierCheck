@@ -6,8 +6,8 @@ import numpy as np
 from json import loads, dumps
 import sys
 
-# LSTM 윈도우 크기
-WINDOW_SIZE = 24
+WINDOW_SIZE = 24        # lstm 윈도우 크기
+THRESHOLD_MSG = 0.4     # 기준 mse
 
 # 메인 클래스
 class main(KafkaManager):
@@ -26,22 +26,26 @@ class main(KafkaManager):
             except: pass
 
             print("받은 메시지 : ", jsonObj)
-            print("받은 시간 : ", jsonObj['msg_data']['timestamp'])
-            print("json : ", jsonObj['msg_data']['features'])
+            self.push(jsonObj['msg_data']['features'])
+            self.check_outlier()
+
+            
 
     # 버퍼에 데이터를 저장한다. 
     # 버퍼에 저장되는 데이터 개수는 WINDOW_SIZE를 넘지 않는다.
     def push(self, value):
         self.buffer.append(value)
-        if (self.buffer.count() > WINDOW_SIZE):
+        if (len(self.buffer) > WINDOW_SIZE):
             self.buffer.remove(1) 
 
     # 버퍼가 가득찼으면 버퍼에 데이터를 이상감지 모델로 검사한다.
     def check_outlier(self):
-        if (self.buffer.count() < WINDOW_SIZE):
+        if (len(self.buffer) < WINDOW_SIZE):
             return
         
-        np_data = np.array(self.buffer)
+        np_data = np.array([self.buffer])
+        print(np_data.shape)
+
         predict = self.lstm.predict(np_data)
         diff_data = self.flatten(np_data) - self.flatten(predict)
         mse = np.mean(np.power(diff_data, 2), axis=1)
