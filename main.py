@@ -1,12 +1,13 @@
 from kafka_manager import KafkaManager
 from json import loads, dumps
 
+import sys
 
 # 메인 클래스
 class main(KafkaManager):
 
-    def __init__(self):
-        super().__init__("192.168.0.217", "9092")
+    def __init__(self, args):
+        super().__init__(args[1], args[2])
         self.buffer = []
 
     def start(self):
@@ -21,5 +22,5 @@ class main(KafkaManager):
             print("json : ", jsonObj['msg_data']['features'])
 
 if __name__ == '__main__':
-    main = main()
+    main = main(sys.argv)
     main.start()
