@@ -1,6 +1,4 @@
 from kafka import KafkaConsumer, KafkaProducer
-from json import loads, dumps
-import time
 
 class KafkaManager:
 
@@ -17,7 +15,6 @@ class KafkaManager:
         
         self.producer = KafkaProducer(
             acks=0, 
-            bootstrap_servers = [server_url], 
-            value_serializer = lambda x: dumps(x).encode('utf-8')
+            bootstrap_servers = [server_url]
         )
 
