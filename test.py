@@ -2,17 +2,15 @@ from main import main
 import time
 import sys
 
-SAMPLE_DATA = '{{"timestamp":"date","idx":{},"feature":{}}}'
+SAMPLE_DATA = '{"timestamp":"2022-08-08 15:38:39","features": [219, 56319, 21848, 12741, 21.0, 4.0]}'
 
 if __name__ == '__main__':
     main = main(sys.argv)
     main.start()
 
-    for i in range(30):
-        for j in range(6):
-            send_msg = SAMPLE_DATA.format(j, i * 6 + j)
-            print("Send Msg : " + send_msg)
-            main.producer.send("outlier_check", value=send_msg)
+    for i in range(100):
+        print("Send Msg : " + SAMPLE_DATA)
+        main.producer.send("outlier_check", value=SAMPLE_DATA)
     
-    time.sleep(30)
+    time.sleep(40)
     main.close()
