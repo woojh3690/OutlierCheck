@@ -1,10 +1,18 @@
-from table_queue import TableQueue
-import numpy as np
+from main import main
+import time
+import sys
+
+SAMPLE_DATA = '{{"timestamp":"date","idx":{},"feature":{}}}'
 
 if __name__ == '__main__':
-    tableQueue = TableQueue(24, 6)
-    tableQueue.push(2, 3)
+    main = main(sys.argv)
+    main.start()
 
-    np_data = np.char.isnumeric(tableQueue.queue)
-    print(np_data)
-    print(np_data.sum())
+    for i in range(30):
+        for j in range(6):
+            send_msg = SAMPLE_DATA.format(j, i * 6 + j)
+            print("Send Msg : " + send_msg)
+            main.producer.send("outlier_check", value=send_msg)
+    
+    time.sleep(30)
+    main.close()
