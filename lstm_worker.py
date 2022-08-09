@@ -1,21 +1,21 @@
 import tensorflow as tf
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Value
 from queue import Empty
 import numpy as np
 
 class LstmWorker(Process):
 
     def __init__(self, process_id, queue: Queue, model_path, threshold):
-        Process.__init__(self, name='worker-'+ str(process_id))
+        super().__init__(name='worker-'+ str(process_id))
         self.id = process_id
         self.queue = queue
         self.model_path = model_path
         self.THRESHOLD_MSE = threshold
-        self.is_end = False
+        self.is_end = Value('i', 0)
         
     def run(self):
         lstm = tf.keras.models.load_model(self.model_path)
-        while (not self.is_end):
+        while (not bool(self.is_end.value)):
             try:
                 np_data = self.queue.get(timeout=5)
             except Empty as e:
@@ -30,6 +30,7 @@ class LstmWorker(Process):
                 print(self.id, "!문제 없음")
             else:
                 print(self.id, "문제 있음")
+        print("{} worker closed.".format(self.id))
     
     # 3차원 -> 2차원 변환
     def flatten(self, X):
@@ -39,4 +40,6 @@ class LstmWorker(Process):
         return(flattened_X)
 
     def close(self):
-        self.is_end = True
+        self.is_end.acquire()
+        self.is_end.value = 1
+        self.is_end.release()
