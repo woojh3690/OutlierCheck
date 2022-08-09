@@ -12,5 +12,7 @@ if __name__ == '__main__':
         print("Send Msg : " + SAMPLE_DATA)
         main.producer.send("outlier_check", value=SAMPLE_DATA)
     
-    time.sleep(40)
+    time.sleep(30)
+
+    print("Send close event")
     main.close()
