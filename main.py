@@ -42,7 +42,6 @@ class main(Thread, KafkaManager):
             for message in self.consumer:
                 try:
                     jsonObj = loads(message.value)
-
                     print("받은 메시지 : ", jsonObj)
                     self.push(jsonObj['features'])
                     self.check_outlier()
@@ -51,26 +50,23 @@ class main(Thread, KafkaManager):
         self.kafka_close()
         print("End kafka listening...")
     
-    # 버퍼에 데이터를 저장한다. 
-    # 버퍼에 저장되는 데이터 개수는 WINDOW_SIZE를 넘지 않는다.
+    # 버퍼에 데이터를 저장한다. 데이터 개수는 WINDOW_SIZE를 넘지 않는다.
     def push(self, value):
         self.buffer.append(value)
         if (len(self.buffer) > WINDOW_SIZE):
             self.buffer.pop(0)
 
     # 버퍼가 가득찼으면 버퍼에 데이터를 이상감지 모델로 검사한다.
-    # @profile
     def check_outlier(self):
         if (len(self.buffer) >= WINDOW_SIZE):
             np_data = np.array([self.buffer])
             self.work_queue.put(np_data)
 
+    # 종료
     def close(self):
         self.is_end = True
-        for worker in self.workers:
-            worker.close()
-        for worker in self.workers:
-            worker.join()
+        for worker in self.workers: worker.close()
+        for worker in self.workers: worker.join()
 
 if __name__ == '__main__':
     main = main(sys.argv)
