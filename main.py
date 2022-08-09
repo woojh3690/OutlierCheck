@@ -11,7 +11,10 @@ import sys
 WINDOW_SIZE = 24        # lstm 윈도우 크기
 FEATURE_SIZE = 6        # lstm 윈도우 크기
 THRESHOLD_MSE = 0.4     # 기준 mse
+
+SAVE_DIR = './tf_model/{}'
 MODEL_VER = 'v2'
+SCALER_NAME = 'scaler.pkl'
 
 # 메인 클래스
 class main(Thread, KafkaManager):
@@ -30,7 +33,8 @@ class main(Thread, KafkaManager):
             worker = LstmWorker(
                 id,
                 self.work_queue,
-                'tf_model/{}'.format(MODEL_VER), 
+                SAVE_DIR.format(MODEL_VER), 
+                SAVE_DIR.format(SCALER_NAME), 
                 THRESHOLD_MSE
             )
             worker.start()
