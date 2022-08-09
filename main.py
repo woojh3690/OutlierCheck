@@ -69,7 +69,8 @@ class main(Thread, KafkaManager):
         self.is_end = True
         for worker in self.workers:
             worker.close()
-
+        for worker in self.workers:
+            worker.join()
 
 if __name__ == '__main__':
     main = main(sys.argv)
