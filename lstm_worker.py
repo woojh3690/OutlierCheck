@@ -21,11 +21,13 @@ class LstmWorker(Process):
     def run(self):
         lstm = tf.keras.models.load_model(self.model_path)
         while (not bool(self.is_end.value)):
+            # 작업 큐에서 작업한개를 가져온다
             try:
                 np_data = self.queue.get(timeout=5)
             except Empty as e:
                 continue
 
+            # TF 모델을 이용한 mse 계산
             np_data_scale = self.scale(np_data)
             predict = lstm.predict(np_data_scale, verbose = 0)
             diff_data = self.flatten(np_data_scale) - self.flatten(predict)
@@ -46,6 +48,7 @@ class LstmWorker(Process):
             X[i, :, :] = self.scaler.transform(X[i, :, :])
         return X
 
+    # 안전하게 스레드를 종료한다.
     def close(self):
         self.is_end.acquire()
         self.is_end.value = 1
