@@ -5,15 +5,17 @@ from multiprocessing import Process, Queue, Value
 from queue import Empty
 import joblib
 
+SAVE_DIR = './tf_model/{}/{}'
+
 class LstmWorker(Process):
 
-    def __init__(self, process_id, queue: Queue, model_path, scaler_path, threshold):
+    def __init__(self, process_id, queue: Queue, modelMeta):
         super().__init__(name='worker-'+ str(process_id))
         self.id = process_id
         self.queue = queue
-        self.model_path = model_path
-        self.THRESHOLD_MSE = threshold
-        self.scaler = joblib.load(scaler_path)
+        self.modelMeta = modelMeta
+        self.model_path = SAVE_DIR.format(modelMeta['model_code'], modelMeta['model_ver'])
+        self.scaler = joblib.load(SAVE_DIR.format(modelMeta['model_code'], 'scaler.pkl'))
         self.is_end = Value('i', 0)
         
     def run(self):
@@ -28,12 +30,7 @@ class LstmWorker(Process):
             predict = lstm.predict(np_data_scale, verbose = 0)
             diff_data = self.flatten(np_data_scale) - self.flatten(predict)
             mse = np.mean(np.power(diff_data, 2), axis=1)[0]
-
-            # 문제 없는 데이터면 다음 메시지 대기
-            if (mse < self.THRESHOLD_MSE):
-                print(self.id, "!문제 없음")
-            else:
-                print(self.id, "문제 있음")
+            print(mse)
         print("{} worker closed.".format(self.id))
     
     # 3차원 -> 2차원 변환

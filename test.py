@@ -8,6 +8,8 @@ if __name__ == '__main__':
     main = main(sys.argv)
     main.start()
 
+    time.sleep(20)
+
     for i in range(100):
         print("Send Msg : " + SAMPLE_DATA)
         main.producer.send("outlier_check", value=SAMPLE_DATA)

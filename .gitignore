@@ -1,4 +1,5 @@
 __pycache__/
 .vscode/
 tf_model/
+conf/
 *.lprof
