@@ -1,3 +1,5 @@
+from analyze_result_sender import AnalyzeResultSender
+
 import tensorflow as tf
 import numpy as np
 
@@ -9,10 +11,11 @@ SAVE_DIR = './tf_model/{}/{}'
 
 class LstmWorker(Process):
 
-    def __init__(self, process_id, queue: Queue, modelMeta):
+    def __init__(self, process_id, queue: Queue, result_queue: Queue, modelMeta):
         super().__init__(name='worker-'+ str(process_id))
         self.id = process_id
         self.queue = queue
+        self.result_queue = result_queue
         self.modelMeta = modelMeta
         self.model_path = SAVE_DIR.format(modelMeta['model_code'], modelMeta['model_ver'])
         self.scaler = joblib.load(SAVE_DIR.format(modelMeta['model_code'], 'scaler.pkl'))
@@ -23,16 +26,17 @@ class LstmWorker(Process):
         while (not bool(self.is_end.value)):
             # 작업 큐에서 작업한개를 가져온다
             try:
-                np_data = self.queue.get(timeout=5)
+                work = self.queue.get(timeout=5)
             except Empty as e:
                 continue
 
             # TF 모델을 이용한 mse 계산
+            np_data = work["data"]
             np_data_scale = self.scale(np_data)
             predict = lstm.predict(np_data_scale, verbose = 0)
             diff_data = self.flatten(np_data_scale) - self.flatten(predict)
             mse = np.mean(np.power(diff_data, 2), axis=1)[0]
-            print(mse)
+            self.result_queue.put({"datetime": work["timestamp"], "mse": mse, "cur_row": np_data[0][-1].tolist()})
         print("{}-id worker closed.".format(self.id))
     
     # 3차원 -> 2차원 변환
