@@ -33,7 +33,7 @@ class LstmWorker(Process):
             diff_data = self.flatten(np_data_scale) - self.flatten(predict)
             mse = np.mean(np.power(diff_data, 2), axis=1)[0]
             print(mse)
-        print("{} worker closed.".format(self.id))
+        print("{}-id worker closed.".format(self.id))
     
     # 3차원 -> 2차원 변환
     def flatten(self, X):

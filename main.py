@@ -55,8 +55,6 @@ class main(Thread, KafkaManager):
                     self.check_outlier()
                 except Exception as e:
                     print(e)
-        self.kafka_close()
-        print("End kafka listening...")
     
     # 버퍼에 데이터를 저장한다. 데이터 개수는 WINDOW_SIZE를 넘지 않는다.
     def push(self, value):
@@ -75,6 +73,7 @@ class main(Thread, KafkaManager):
         self.is_end = True
         for worker in self.workers: worker.close()
         for worker in self.workers: worker.join()
+        super().kafka_close()
 
 if __name__ == '__main__':
     main = main(sys.argv)

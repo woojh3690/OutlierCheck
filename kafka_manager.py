@@ -6,6 +6,7 @@ class KafkaManager:
     def __init__(self, ip, port):
         server_url = "{}:{}".format(ip, port)
 
+        # Kafka 소비자 초기화
         self.consumer = KafkaConsumer(
             'outlier_check',
             bootstrap_servers=[server_url],
@@ -16,6 +17,7 @@ class KafkaManager:
             consumer_timeout_ms=5000
         )
         
+        # Kafka 생성자 초기화
         self.producer = KafkaProducer(
             acks=0, 
             bootstrap_servers = [server_url],
@@ -25,4 +27,5 @@ class KafkaManager:
     def kafka_close(self):
         self.consumer.close()
         self.producer.close()
+        print("Destroyed KafkaManager...")
 
