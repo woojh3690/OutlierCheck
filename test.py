@@ -4,7 +4,7 @@ import time
 import sys
 import json
 
-SAMPLE_DATA = {"timestamp":"2022-08-08 15:38:39","features": [219, 56319, 21848, 12741, 21.0, 4.0]}
+SAMPLE_DATA = {"timestamp":"2022-08-08 15:38:39","features": [219, 56319, 21848, 12741, 21.0, 4.0, 1]}
 
 if __name__ == '__main__':
     main = main(sys.argv)

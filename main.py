@@ -70,7 +70,7 @@ class main(Thread, KafkaManager):
     def check_outlier(self, timestamp):
         if (len(self.buffer) >= self.WINDOW_SIZE):
             np_data = np.array([self.buffer])
-            self.work_queue.put({"timestamp": timestamp, "data": np_data})
+            self.work_queue.put({"timestamp": timestamp, "cur_row": self.buffer[-1], "data": np_data})
 
     # 종료
     def close(self):
