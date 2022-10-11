@@ -10,16 +10,28 @@ if __name__ == '__main__':
     main = main(sys.argv)
     main.start()
 
-    time.sleep(30)
+    time.sleep(20)
 
     now = datetime.now()
-    for i in range(100):
+
+    # 모델 초기화
+    for i in range(20):
+        now += timedelta(seconds=1)
+        SAMPLE_DATA["timestamp"] = now.strftime("%Y-%m-%d %H:%M:%S")
+        send_msg = json.dumps(SAMPLE_DATA)
+        main.producer.send("outlier_check", value=send_msg)
+
+    time.sleep(10)
+
+    # 모델 성능 측정
+    for i in range(10000):
         now += timedelta(seconds=1)
         SAMPLE_DATA["timestamp"] = now.strftime("%Y-%m-%d %H:%M:%S")
         send_msg = json.dumps(SAMPLE_DATA)
         main.producer.send("outlier_check", value=send_msg)
     
-    time.sleep(30)
+    time.sleep(120)
 
     print("Send close event")
     main.close()
+    main.join()
