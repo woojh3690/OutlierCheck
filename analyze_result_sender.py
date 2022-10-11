@@ -23,6 +23,7 @@ class AnalyzeResultSender(Thread):
             except Empty as e:
                 continue
             self.send_to_web(data["datetime"], data['mse'], data['cur_row'])
+        print("Analyze result close...")
 
     # web 에 전송할 메시지를 만들고 web topic 으로 데이터를 전송한다.
     def send_to_web(self, datetime: str, mse: float, cur_row: list):

@@ -59,6 +59,7 @@ class main(Thread, KafkaManager):
                     self.check_outlier(jsonObj['timestamp'])
                 except Exception as e:
                     print(e)
+        print("End main...")
     
     # 버퍼에 데이터를 저장한다. 데이터 개수는 WINDOW_SIZE를 넘지 않는다.
     def push(self, value):
