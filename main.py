@@ -26,7 +26,7 @@ class main(Thread, KafkaManager):
         self.WINDOW_SIZE = self.modelMeta['window_size']    # 윈도우 사이즈
         self.buffer = []                                    # 데이터 버퍼
         self.work_queue = Queue()                           # Thread-safe 작업 명령 큐
-        self.result_queue = Queue()                         # Thread-safe 작업 명령 큐
+        self.result_queue = Queue()                         # Thread-safe 작업 결과 큐
         self.workers = []                                   # 모델 실행 스레드 리스트
         self.is_end = False                                 # 종료 이벤트
 
