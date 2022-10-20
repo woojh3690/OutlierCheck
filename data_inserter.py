@@ -45,7 +45,7 @@ if __name__ == '__main__':
         # 데이터 프레임 커서 초기화
         cursors.append(0)
 
-        if (idx == 0): continue
+        # if (idx == 0): continue
         timer = RepeatedTimer(1, sendTrainData, idx)
         timers.append(timer)
-        break
+        # break

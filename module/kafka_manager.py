@@ -3,7 +3,7 @@ from json import loads, dumps
 
 class KafkaManager:
 
-    def __init__(self, ip, port):
+    def __init__(self, ip, port, group_id):
         server_url = "{}:{}".format(ip, port)
 
         # Kafka 소비자 초기화
@@ -12,7 +12,7 @@ class KafkaManager:
             bootstrap_servers=[server_url],
             auto_offset_reset='latest',
             enable_auto_commit=True,
-            group_id='outlier_checker',
+            group_id=group_id,
             value_deserializer=lambda x: x.decode('utf-8'),
             consumer_timeout_ms=5000
         )

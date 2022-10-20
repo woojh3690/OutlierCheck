@@ -17,7 +17,7 @@ class main(Thread, KafkaManager):
         if (len(args) != 5): print('유효한 인자가 없습니다.')
 
         Thread.__init__(self)
-        KafkaManager.__init__(self, args[1], args[2])
+        KafkaManager.__init__(self, args[1], args[2], args[4])
 
         # 모델 메타데이터 초기화
         self.model_code = args[4]
