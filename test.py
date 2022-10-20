@@ -4,7 +4,7 @@ import time
 import sys
 import json
 
-SAMPLE_DATA = {"timestamp":"2022-08-08 15:38:39","features": [219, 56319, 21848, 12741, 21.0, 4.0, 1]}
+SAMPLE_DATA = {"model_code": "", "timestamp":"2022-08-08 15:38:39","features": [219, 56319, 21848, 12741, 21.0, 4.0, 1]}
 
 if __name__ == '__main__':
     main = main(sys.argv)
@@ -13,6 +13,9 @@ if __name__ == '__main__':
     time.sleep(20)
 
     now = datetime.now()
+
+    # model_code 초기화
+    SAMPLE_DATA["model_code"] = "cycle_retrieve" #sys.argv[4]
 
     # 모델 초기화
     for i in range(20):

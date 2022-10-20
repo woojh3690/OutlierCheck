@@ -20,7 +20,8 @@ class main(Thread, KafkaManager):
         KafkaManager.__init__(self, args[1], args[2])
 
         # 모델 메타데이터 초기화
-        self.modelMeta = readModelMeta(args[4])
+        self.model_code = args[4]
+        self.modelMeta = readModelMeta(self.model_code)
         
         self.WINDOW_SIZE = self.modelMeta['window_size']    # 윈도우 사이즈
         self.buffer = []                                    # 데이터 버퍼
@@ -47,11 +48,15 @@ class main(Thread, KafkaManager):
             for message in self.consumer:
                 try:
                     jsonObj = json.loads(message.value)
+                    if jsonObj["model_code"] != self.model_code:
+                        continue
+
                     print("받은 메시지 : ", jsonObj)
                     self.push(jsonObj['features'])
                     self.check_outlier(jsonObj['timestamp'])
                 except Exception as e:
                     print(e)
+        super().kafka_close()
         print("End main...")
     
     # 버퍼에 데이터를 저장한다. 데이터 개수는 WINDOW_SIZE를 넘지 않는다.
@@ -71,7 +76,6 @@ class main(Thread, KafkaManager):
         self.is_end = True
         for worker in self.workers: worker.close()
         for worker in self.workers: worker.join()
-        super().kafka_close()
 
 if __name__ == '__main__':
     main = main(sys.argv)
