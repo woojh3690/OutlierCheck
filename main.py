@@ -1,7 +1,7 @@
-from kafka_manager import KafkaManager
-from lstm_worker import LstmWorker
-from analyze_result_sender import AnalyzeResultSender
-from model_meta import readModelMeta
+from module.kafka_manager import KafkaManager
+from module.worker.lstm_worker import LstmWorker
+from module.worker.analyze_result_sender import AnalyzeResultSender
+from module.model_meta import readModelMeta
 
 import numpy as np
 

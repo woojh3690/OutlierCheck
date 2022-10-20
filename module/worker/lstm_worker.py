@@ -1,4 +1,4 @@
-from analyze_result_sender import AnalyzeResultSender
+from module.analyze_result_sender import AnalyzeResultSender
 
 import tensorflow as tf
 import numpy as np
