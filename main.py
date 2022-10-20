@@ -1,6 +1,7 @@
 from kafka_manager import KafkaManager
 from lstm_worker import LstmWorker
 from analyze_result_sender import AnalyzeResultSender
+from model_meta import readModelMeta
 
 import numpy as np
 
@@ -19,10 +20,8 @@ class main(Thread, KafkaManager):
         KafkaManager.__init__(self, args[1], args[2])
 
         # 모델 메타데이터 초기화
-        for modelMeta in self.readModelMeta():
-            if modelMeta['model_code'] == args[4]:
-                self.modelMeta = modelMeta
-
+        self.modelMeta = readModelMeta(args[4])
+        
         self.WINDOW_SIZE = self.modelMeta['window_size']    # 윈도우 사이즈
         self.buffer = []                                    # 데이터 버퍼
         self.work_queue = Queue()                           # Thread-safe 작업 명령 큐
@@ -40,12 +39,6 @@ class main(Thread, KafkaManager):
             worker = LstmWorker(id, self.work_queue, self.result_queue, self.modelMeta)
             worker.start()
             self.workers.append(worker)
-
-    def readModelMeta(self):
-        modelsMeta = None
-        with open("./conf/models_info.json", "r", encoding='utf-8') as file:
-            modelsMeta = json.load(file)
-        return modelsMeta
 
     # Override Thread
     def run(self):
