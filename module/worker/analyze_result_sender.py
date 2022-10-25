@@ -2,6 +2,7 @@ from multiprocessing import Queue, Value
 from threading import Thread
 from queue import Empty
 from copy import deepcopy
+import math
 import json
 
 
@@ -32,6 +33,9 @@ class AnalyzeResultSender(Thread):
 
     # web 에 전송할 메시지 생성
     def create_send_msg(self, datetime: str, mse: float, cur_row: list):
+        # mse 소수 점 절삭
+        mse = round(mse, 4)
+
         send_msg = self.get_default_json()
 
         # datetime 설정
