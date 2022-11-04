@@ -19,6 +19,11 @@ dfs = []
 cursors = []
 modelMetas = readModelMetas()
 
+# 데이터 변형
+select_model = -1
+select_col = -1
+change_value = -1
+
 # SAMPLE_DATA = {"model_code": "", "timestamp":"2022-08-08 15:38:39","features": [219, 56319, 21848, 12741, 21.0, 4.0, 1]}
 def sendTrainData(idx):
     # 데이터 메시지 생성
@@ -26,12 +31,16 @@ def sendTrainData(idx):
     msg["model_code"] =  modelMetas[idx]['model_code']
     msg["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     temp = dfs[idx].iloc[cursors[idx], :].tolist()
+
+    if (idx == select_model):
+        temp[select_col] = change_value
+
     msg["features"] = temp
 
     # 데이터 전송
     strMsg = json.dumps(msg, ensure_ascii=False)
     producer.send("outlier_check", value=strMsg)
-    print("전송한 메시지 : ", strMsg)
+    #print("전송한 메시지 : ", strMsg)
     cursors[idx] += 1
 
 if __name__ == '__main__':
@@ -45,7 +54,22 @@ if __name__ == '__main__':
         # 데이터 프레임 커서 초기화
         cursors.append(0)
 
-        # if (idx == 0): continue
         timer = RepeatedTimer(1, sendTrainData, idx)
         timers.append(timer)
-        # break
+
+    while True:
+        print("자전거 : 0, 교통 : 1, 자전거 + 교통 : 2")
+        select_model_temp = int(input("변형할 트윈 선택 : "))
+        modelMeta = modelMetas[select_model]
+
+        print("변형할 칼럼 선택", modelMeta["input_col_infos"])
+        select_col_temp = int(input("변형할 칼럼 선택 : "))
+        change_value = int(input("변형할 값 선택 : "))
+        select_model = select_model_temp
+        select_col = select_col_temp
+
+        print("잘못된 데이터로 변형중입니다.")
+        input("변형을 중시하시려면 아무키나 입력 : ")
+        select_model = -1
+        select_col = -1
+        change_value = -1
