@@ -58,13 +58,15 @@ if __name__ == '__main__':
         timers.append(timer)
 
     while True:
+        print("")
+        print("--------------------------------")
         print("자전거 : 0, 교통 : 1, 자전거 + 교통 : 2")
         select_model_temp = int(input("변형할 트윈 선택 : "))
-        modelMeta = modelMetas[select_model]
+        modelMeta = modelMetas[select_model_temp]
 
-        print("변형할 칼럼 선택", modelMeta["input_col_infos"])
-        select_col_temp = int(input("변형할 칼럼 선택 : "))
-        change_value = int(input("변형할 값 선택 : "))
+        print("변형 가능한 칼럼", modelMeta["input_col_infos"])
+        select_col_temp = int(input("변형할 칼럼 : "))
+        change_value = int(input("변형할 값 : "))
         select_model = select_model_temp
         select_col = select_col_temp
 
