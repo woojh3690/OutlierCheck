@@ -2,7 +2,7 @@ from multiprocessing import Queue, Value
 from threading import Thread
 from queue import Empty
 from copy import deepcopy
-import math
+import random
 import json
 
 
@@ -44,7 +44,12 @@ class AnalyzeResultSender(Thread):
         # input_data 설정
         input_data = []
         for idx, field in enumerate(self.modelMeta["input_col_infos"]):
-            input_data.append({"name": field, "value": cur_row[idx]})
+            input_data.append({"name": field, "value": int(cur_row[idx])})
+
+        if (self.modelMeta['model_code'] != 'cycle_retrieve'):
+            predict_traffic = input_data.pop(2)
+            input_data.append(predict_traffic)
+
         send_msg["input_data"] = input_data
 
         # mse 설정
