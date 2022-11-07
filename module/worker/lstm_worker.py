@@ -36,7 +36,7 @@ class LstmWorker(Process):
             predict = lstm.predict(np_data_scale, verbose = 0)
             diff_data = self.flatten(np_data_scale) - self.flatten(predict)
             mse = np.mean(np.power(diff_data, 2), axis=1)[0]
-            self.result_queue.put({"datetime": work["timestamp"], "mse": mse, "cur_row": work["cur_row"]})
+            self.result_queue.put({"datetime": work["timestamp"], "mse": mse, "cur_row": work["cur_row"], "type": work["type"]})
         print("{}-id worker closed.".format(self.id))
     
     # 3차원 -> 2차원 변환

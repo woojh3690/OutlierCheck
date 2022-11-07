@@ -30,10 +30,12 @@ def sendTrainData(idx):
     msg = {}
     msg["model_code"] =  modelMetas[idx]['model_code']
     msg["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    msg["type"] = 1
     temp = dfs[idx].iloc[cursors[idx], :].tolist()
 
     if (idx == select_model):
         temp[select_col] = change_value
+        msg["type"] = 0
 
     msg["features"] = temp
 

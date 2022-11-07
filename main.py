@@ -53,7 +53,7 @@ class main(Thread, KafkaManager):
 
                     print("받은 메시지 : ", jsonObj)
                     self.push(jsonObj['features'])
-                    self.check_outlier(jsonObj['timestamp'])
+                    self.check_outlier(jsonObj['timestamp'], jsonObj['type'])
                 except Exception as e:
                     print(e)
         super().kafka_close()
@@ -66,10 +66,10 @@ class main(Thread, KafkaManager):
             self.buffer.pop(0)
 
     # 버퍼가 가득찼으면 버퍼에 데이터를 이상감지 모델로 검사한다.
-    def check_outlier(self, timestamp):
+    def check_outlier(self, timestamp, type):
         if (len(self.buffer) >= self.WINDOW_SIZE):
             np_data = np.array([self.buffer])
-            self.work_queue.put({"timestamp": timestamp, "cur_row": self.buffer[-1], "data": np_data})
+            self.work_queue.put({"timestamp": timestamp, "cur_row": self.buffer[-1], "data": np_data, "type": type})
 
     # 종료
     def close(self):

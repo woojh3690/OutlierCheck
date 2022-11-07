@@ -23,16 +23,16 @@ class AnalyzeResultSender(Thread):
                 data = self.queue.get(timeout=5)
             except Empty as e:
                 continue
-            self.send_to_web(data["datetime"], data['mse'], data['cur_row'])
+            self.send_to_web(data["datetime"], data['mse'], data['cur_row'], data['type'])
         print("Analyze result close...")
 
     # web 에 전송할 메시지를 만들고 web topic 으로 데이터를 전송한다.
-    def send_to_web(self, datetime: str, mse: float, cur_row: list):
-        send_msg = self.create_send_msg(datetime, mse, cur_row)
+    def send_to_web(self, datetime: str, mse: float, cur_row: list, type: int):
+        send_msg = self.create_send_msg(datetime, mse, cur_row, type)
         self.kafkaProducer.send(self.modelMeta["model_code"], value=send_msg)
 
     # web 에 전송할 메시지 생성
-    def create_send_msg(self, datetime: str, mse: float, cur_row: list):
+    def create_send_msg(self, datetime: str, mse: float, cur_row: list, type: int):
         # mse 소수 점 절삭
         mse = round(mse, 4)
 
@@ -55,13 +55,18 @@ class AnalyzeResultSender(Thread):
         # mse 설정
         send_msg["analysis"]["mse"] = mse
 
+
         value = None
         name = None
         for threshold in self.modelMeta["threshold"]:
             cur_value = threshold["value"]
-            if (mse > cur_value and (value is None or cur_value > value)):
-                value = cur_value
-                name = threshold["name"]
+            if mse > cur_value and (value is None or cur_value > value):
+                if (type == 1):
+                    value = cur_value
+                    name = threshold["name"]
+                else:
+                    send_msg["analysis"]["mse"] = 0.005
+                
         
         # error_data 설정
         error_data = deepcopy(input_data)
