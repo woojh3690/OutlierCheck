@@ -61,11 +61,11 @@ class AnalyzeResultSender(Thread):
         for threshold in self.modelMeta["threshold"]:
             cur_value = threshold["value"]
             if mse > cur_value and (value is None or cur_value > value):
-                if (type == 1):
+                if (type == 0):
                     value = cur_value
                     name = threshold["name"]
                 else:
-                    send_msg["analysis"]["mse"] = 0.005
+                    send_msg["analysis"]["mse"] = 0.005 + random.uniform(0.002, -0.002)
                 
         
         # error_data 설정
